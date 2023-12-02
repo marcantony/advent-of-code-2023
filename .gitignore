@@ -1,0 +1,12 @@
+.vscode/
+
+deps/
+
+# sbt
+target/
+
+# metals stuff
+.metals/
+.bloop/
+.ammonite/
+metals.sbt
