@@ -45,6 +45,12 @@ case class Game(id: Int, drawings: Seq[Drawing]) {
     def obeysLimit(r: Red, g: Green, b: Blue): Boolean = {
         drawings.filter(d => d.red.n > r.n || d.green.n > g.n || d.blue.n > b.n).isEmpty
     }
+
+    def minCubeSet: (Red, Green, Blue) = {
+        val minSet = drawings.foldLeft((0, 0, 0))((acc, d) =>
+            (Math.max(acc._1, d.red.n), Math.max(acc._2, d.green.n), Math.max(acc._3, d.blue.n)))
+        (Red(minSet._1), Green(minSet._2), Blue(minSet._3))
+    }
 }
 object Game {
     def apply(s: String): Option[Game] = s match {
@@ -66,7 +72,7 @@ Game("Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue")
 Game("Game 3: hello")
 Game("asdf")
 
-def test(games: Seq[Game]): Int = {
+def testPart1(games: Seq[Game]): Int = {
     val r = Red(12)
     val g = Green(13)
     val b = Blue(14)
@@ -80,12 +86,20 @@ Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue
 Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red
 Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red
 Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green
-""".trim().split('\n').map(_.trim()).map(Game(_)).map(_.get)
+""".trim().split('\n').map(_.trim()).map(Game(_)).map(_.get).toSeq
 
-test(testInput.toSeq)
+testPart1(testInput)
 
 val gamesFile = Source.fromFile("""days\2\games.txt""")
 val lines = gamesFile.getLines().toList
 gamesFile.close()
+val fullInput = lines.map(Game(_)).map(_.get)
 
-test(lines.map(Game(_)).map(_.get))
+testPart1(fullInput)
+
+def testPart2(games: Seq[Game]): Int = {
+    games.map(_.minCubeSet).map(t => t._1.n * t._2.n * t._3.n).sum
+}
+
+testPart2(testInput)
+testPart2(fullInput)
