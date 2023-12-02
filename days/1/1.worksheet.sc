@@ -24,8 +24,9 @@ val part2ValueExtractor: String => Option[Int] = line => {
         case Seq('n', 'i', 'n', 'e', _*) => 9
         case Seq(c, _*) if c.isDigit => c.asDigit
     }: PartialFunction[Seq[Char], Int]).compose(s => (s: Seq[Char]))
-    val leftDigit = line.tails.collectFirst(prefixToValue)
-    val rightDigit = line.tails.toList.reverseIterator.collectFirst(prefixToValue)
+    val tails = line.tails.toSeq
+    val leftDigit = tails.collectFirst(prefixToValue)
+    val rightDigit = tails.reverseIterator.collectFirst(prefixToValue)
 
     for {
         l <- leftDigit
