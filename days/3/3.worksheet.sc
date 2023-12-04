@@ -1,14 +1,17 @@
 import scala.io.Source
 
-case class ParsedNumber(row: Int, startIndex: Int, endIndex: Int, value: Int)
-def findPartNumbers(schematic: String): Iterable[Int] = {
+case class ParsedNumber(row: Int, startIndex: Int, endIndex: Int, value: Int) {
+    def isAdjacentTo(x: Int, y: Int) = x >= startIndex - 1 && x <= endIndex && y >= row - 1 && y <= row + 1
+}
+
+def findPartNumbers(schematic: String): Iterable[ParsedNumber] = {
     val numberPattern = """\d+""".r
     val allNumbers = schematic.linesIterator.zipWithIndex
         .flatMap((line, row) => numberPattern.findAllMatchIn(line).map((_, row)))
         .map((regexMatch, row) => ParsedNumber(row, regexMatch.start, regexMatch.end, regexMatch.matched.toInt))
 
     val isAdjacentInSchema = isPartNumber(schematic) _
-    allNumbers.filter(isAdjacentInSchema).map(_.value).toSeq
+    allNumbers.filter(isAdjacentInSchema).toSeq
 }
 
 def isPartNumber(schematic: String)(number: ParsedNumber): Boolean = {
@@ -45,10 +48,40 @@ val testInput = """467..114..
                   |...$.*....
                   |.664.598..""".stripMargin
 
-findPartNumbers(testInput).tapEach(n => println(s"$n is a part number")).sum
+findPartNumbers(testInput).map(_.value).tapEach(n => println(s"$n is a part number")).sum
 
 val schematicFile = Source.fromFile("days/3/schematic.txt")
 val schematic = schematicFile.mkString
 schematicFile.close()
 
-findPartNumbers(schematic).sum
+findPartNumbers(schematic).map(_.value).sum
+
+def findAllInSchematic(schematic: String)(symbol: Char): Iterable[(Int, Int)] =
+    schematic.linesIterator.zipWithIndex.flatMap((line, row) => {
+        val symbolIndices = line.zipWithIndex.filter((c, _) => c == symbol).map(_._2)
+        symbolIndices.map { (_, row) }
+    }).toSeq
+
+findAllInSchematic(testInput)('*')
+
+def findGearRatios(schematic: String): Iterable[Int] = {
+    val partNumbers = findPartNumbers(schematic)
+    val possibleGears = findAllInSchematic(schematic)('*')
+
+    val possibleGearsWithValues = (
+        for {
+            part <- partNumbers
+            possibleGear <- possibleGears
+        } yield if (part.isAdjacentTo(possibleGear._1, possibleGear._2)) Some((possibleGear, part)) else None)
+        .flatten
+        .groupMap(_._1)(_._2)
+    println(possibleGearsWithValues)
+    
+    possibleGearsWithValues.collect {
+            case (gear, parts) if parts.size == 2 => parts.map(_.value).product
+        }
+}
+
+findGearRatios(testInput).sum
+
+findGearRatios(schematic).sum
