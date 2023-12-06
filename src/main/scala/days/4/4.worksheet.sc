@@ -39,21 +39,23 @@ part1(cards)
 def winningNums(card: String): Option[Set[Int]] = parseCard(card).map { case (winningNums, yourNums) => winningNums.intersect(yourNums) }
 
 case class Card(id: Int, wins: Int)
-case class CardState(inputCards: Iterator[Card], copies: List[Int])
+case class CardState(inputCards: Iterator[Card], copies: Map[Int, Int])
 def part2(cards: Seq[String]): Option[Int] = {
     val inputCards = cards.traverse(winningNums(_)).map(_.zipWithIndex.map { case (nums, idx) => Card(idx + 1, nums.size) })
     // println(s"Input cards: $inputCards")
 
     val allCards = inputCards.map { ic =>
-        Iterator.unfold(CardState(ic.iterator, List()))(cardState => {
+        Iterator.unfold(CardState(ic.iterator, Map()))(cardState => {
             cardState.inputCards.nextOption().map(c => {
                 // println(s"Unfolding id $c.id")
-                val copiesOfCard = cardState.copies.count(_ == c.id) + 1
+                val copiesOfCard = cardState.copies.getOrElse(c.id, 0) + 1
                 // println(s"$copiesOfCard copies")
                 val nextChunk = Iterator.fill(copiesOfCard)(c.id)
                 val copiedCards = c.id + 1 to c.id + c.wins
                 val newCopies = List.fill(copiesOfCard)(copiedCards).flatten
-                (nextChunk, cardState.copy(copies = newCopies ::: cardState.copies))
+                val occurrencesOfNewCopies = newCopies.groupMapReduce(identity)(_ => 1)(_ + _)
+                val newCopyState = cardState.copies.combine(occurrencesOfNewCopies)
+                (nextChunk, cardState.copy(copies = newCopyState))
             })
         }).flatten.toSeq
     }
