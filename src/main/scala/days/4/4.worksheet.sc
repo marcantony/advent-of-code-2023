@@ -1,4 +1,6 @@
 import scala.io.Source
+import days.support.Utils
+
 def parseCard(card: String): Option[(Set[Int], Set[Int])] = {
     def parseNums(s: String): Set[Int] = s.split(' ').filterNot(_.isEmpty()).map(_.toInt).toSet
     card match {
@@ -30,8 +32,6 @@ def part1(cards: Seq[String]): Option[Int] = {
 
 part1(testInput)
 
-val cardsFile = Source.fromFile("src/main/scala/days/4/cards.txt")
-val cards = cardsFile.getLines().toSeq
-cardsFile.close()
+val cards = Utils.readFile("src/main/scala/days/4/cards.txt")
 
 part1(cards)
