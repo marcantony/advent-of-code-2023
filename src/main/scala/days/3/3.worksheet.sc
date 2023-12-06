@@ -50,7 +50,7 @@ val testInput = """467..114..
 
 findPartNumbers(testInput).map(_.value).tapEach(n => println(s"$n is a part number")).sum
 
-val schematicFile = Source.fromFile("days/3/schematic.txt")
+val schematicFile = Source.fromFile("src/main/scala/days/3/schematic.txt")
 val schematic = schematicFile.mkString
 schematicFile.close()
 

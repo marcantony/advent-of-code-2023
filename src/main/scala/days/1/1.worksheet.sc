@@ -74,7 +74,7 @@ findTotalCalibrationValue("""
     |7pqrstsixteen
     """.stripMargin.trim.split('\n'), part2ValueExtractor)
 
-val calibrationDoc = Source.fromFile("""days\1\calibration.txt""")
+val calibrationDoc = Source.fromFile("src/main/scala/days/1/calibration.txt")
 val lines = calibrationDoc.getLines().toList
 calibrationDoc.close()
 

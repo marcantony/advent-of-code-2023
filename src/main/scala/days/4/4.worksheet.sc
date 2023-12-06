@@ -30,7 +30,7 @@ def part1(cards: Seq[String]): Option[Int] = {
 
 part1(testInput)
 
-val cardsFile = Source.fromFile("days/4/cards.txt")
+val cardsFile = Source.fromFile("src/main/scala/days/4/cards.txt")
 val cards = cardsFile.getLines().toSeq
 cardsFile.close()
 

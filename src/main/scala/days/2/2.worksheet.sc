@@ -90,7 +90,7 @@ Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green
 
 testPart1(testInput)
 
-val gamesFile = Source.fromFile("""days\2\games.txt""")
+val gamesFile = Source.fromFile("src/main/scala/days/2/games.txt")
 val lines = gamesFile.getLines().toList
 gamesFile.close()
 val fullInput = lines.map(Game(_)).map(_.get)
