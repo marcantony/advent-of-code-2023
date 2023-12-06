@@ -1,5 +1,6 @@
 import scala.io.Source
 import days.support.Utils
+import cats.syntax.all._
 
 def parseCard(card: String): Option[(Set[Int], Set[Int])] = {
     def parseNums(s: String): Set[Int] = s.split(' ').filterNot(_.isEmpty()).map(_.toInt).toSet
@@ -11,8 +12,7 @@ def parseCard(card: String): Option[(Set[Int], Set[Int])] = {
 }
 
 def scoreCard(card: String): Option[Int] = {
-    val intersection = parseCard(card).map { case (winningNums, yourNums) => winningNums.intersect(yourNums) }
-    intersection.map(nums => if (nums.isEmpty) 0 else Math.pow(2, nums.size - 1).intValue)
+    winningNums(card).map(nums => if (nums.isEmpty) 0 else Math.pow(2, nums.size - 1).intValue)
 }
 
 val testInput = """Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53
@@ -35,3 +35,33 @@ part1(testInput)
 val cards = Utils.readFile("src/main/scala/days/4/cards.txt")
 
 part1(cards)
+
+def winningNums(card: String): Option[Set[Int]] = parseCard(card).map { case (winningNums, yourNums) => winningNums.intersect(yourNums) }
+
+case class Card(id: Int, wins: Int)
+case class CardState(inputCards: Iterator[Card], copies: List[Int])
+def part2(cards: Seq[String]): Option[Int] = {
+    val inputCards = cards.traverse(winningNums(_)).map(_.zipWithIndex.map { case (nums, idx) => Card(idx + 1, nums.size) })
+    // println(s"Input cards: $inputCards")
+
+    val allCards = inputCards.map { ic =>
+        Iterator.unfold(CardState(ic.iterator, List()))(cardState => {
+            cardState.inputCards.nextOption().map(c => {
+                // println(s"Unfolding id $c.id")
+                val copiesOfCard = cardState.copies.count(_ == c.id) + 1
+                // println(s"$copiesOfCard copies")
+                val nextChunk = Iterator.fill(copiesOfCard)(c.id)
+                val copiedCards = c.id + 1 to c.id + c.wins
+                val newCopies = List.fill(copiesOfCard)(copiedCards).flatten
+                (nextChunk, cardState.copy(copies = newCopies ::: cardState.copies))
+            })
+        }).flatten.toSeq
+    }
+    // println(s"All cards: $allCards")
+
+    allCards.map(_.size)
+}
+
+part2(testInput)
+
+part2(cards)
